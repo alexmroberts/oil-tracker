@@ -1,0 +1,6 @@
+sqlalchemy
+psycopg2-binary
+httpx
+beautifulsoup4
+apscheduler
+python-dotenv
