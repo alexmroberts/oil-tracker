@@ -1,7 +1,9 @@
 import logging
 import os
 from sqlalchemy import create_engine, text
+from sqlalchemy.orm import Session
 from tracker.models import Base, OilPrice
+from tracker.scraper import fetch_oil_price
 import time
 
 
@@ -10,7 +12,7 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
 )
-logger = logging.getLogger("oil_tracker")
+logger = logging.getLogger(__name__)
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 engine = create_engine(DATABASE_URL)
@@ -36,6 +38,26 @@ def init_db():
                 raise e
 
 
+def run_scraper_and_save():
+    """Fetches the current price and stores it in the database."""
+    logger.info("Starting scrape job for Vernon (06066)...")
+
+    price = fetch_oil_price()
+
+    if price:
+        try:
+            with Session(engine) as session:
+                new_record = OilPrice(
+                    supplier_name="Cash Heating Oil - Vernon",
+                    price_per_gallon=price
+                )
+                session.add(new_record)
+                session.commit()
+                logger.info(f"Price of ${price} saved to DB.")
+        except Exception as e:
+            logger.error(f"Database save failed: {e}")
+    else:
+        logger.warning("Scraper returned no data; nothing to save.")
 
 
 
@@ -56,3 +78,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    run_scraper_and_save()
