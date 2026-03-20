@@ -14,6 +14,7 @@ services:
 
   app:
     build: .
+    restart: always
     volumes:
       - ./src:/app/src
       - ./logs:/app/logs
