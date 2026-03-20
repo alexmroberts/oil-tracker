@@ -5,6 +5,9 @@ from sqlalchemy.orm import Session
 from tracker.models import Base, OilPrice
 from tracker.scraper import fetch_oil_prices
 import time
+from apscheduler.schedulers.blocking import BlockingScheduler
+import signal
+import sys
 
 logging.basicConfig(
     level=logging.INFO,
@@ -16,6 +19,18 @@ logger = logging.getLogger(__name__)
 DATABASE_URL = os.getenv('DATABASE_URL')
 engine = create_engine(DATABASE_URL)
 DATABASE_CONNECTION_ATTEMPTS = 5
+
+
+def handle_sigterm(*args):
+    """
+    Catch the SIGTERM signal and raise SystemExit.
+    """
+    logger.info("Received SIGTERM. Triggering graceful shutdown...")
+    sys.exit(0)
+
+
+signal.signal(signal.SIGTERM, handle_sigterm)
+signal.signal(signal.SIGINT, handle_sigterm)
 
 
 def init_db():
@@ -58,6 +73,7 @@ def run_scraper_and_save():
                 logger.info(f'Saved dealer entry {len(price)} entries to DB')
         except Exception as e:
             logger.error(f'Database save failed: {e}')
+            session.rollback()
     else:
         logger.warning('Scraper returned no data; nothing to save.')
 
@@ -77,4 +93,25 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+    scheduler = BlockingScheduler()
+
     run_scraper_and_save()
+    scheduler.add_job(
+        run_scraper_and_save,
+        'cron',
+        hour=8,
+        minute=0,
+        jitter=7200,
+        timezone='America/New_York'
+    )
+
+    try:
+        scheduler.start()
+    except (KeyboardInterrupt, SystemExit):
+        logger.info('Stopping Scheduler')
+    finally:
+        if scheduler.running:
+            scheduler.shutdown()
+        engine.dispose()
+        logger.info('Database connection closed')
