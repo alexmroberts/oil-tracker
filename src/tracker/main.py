@@ -3,6 +3,7 @@ import os
 import signal
 import sys
 import time
+from logging.handlers import RotatingFileHandler
 
 from apscheduler.schedulers.blocking import BlockingScheduler
 from sqlalchemy import create_engine, text
@@ -11,10 +12,25 @@ from sqlalchemy.orm import Session
 from tracker.models import Base, OilPrice
 from tracker.scraper import fetch_oil_prices
 
+LOG_FORMAT = "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
+LOG_DIR = "logs"
+if not os.path.exists(LOG_DIR):
+    os.makedirs(LOG_DIR)
+log_formatter = logging.Formatter(LOG_FORMAT, datefmt=DATE_FORMAT)
+
+log_file = os.path.join(LOG_DIR, "oil_tracker.log")
+file_handler = RotatingFileHandler(log_file, maxBytes=5 * 1024 * 1024, backupCount=15)
+file_handler.setFormatter(log_formatter)
+# file_handler.setLevel(logging.INFO)
+
+console_handler = logging.StreamHandler()
+console_handler.setFormatter(log_formatter)
+# console_handler.setLevel(logging.INFO)
+
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
+    handlers=[file_handler, console_handler],
 )
 logger = logging.getLogger(__name__)
 
