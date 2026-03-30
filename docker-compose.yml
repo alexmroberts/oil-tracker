@@ -17,9 +17,10 @@ services:
       -c max_connections=50
       -c work_mem=16MB
 
-  app:
+  scraper:
     build: .
     restart: always
+    command: python src/tracker/main.py
     volumes:
       - ./src:/app/src
       - ./logs:/app/logs
@@ -27,6 +28,22 @@ services:
     environment:
       - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
       - TZ=America/New_York
+      - PYTHONPATH=/app
+    depends_on:
+      - db
+  api:
+    build: .
+    restart: always
+    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./src:/app/src
+    env_file: .env
+    environment:
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
+      - TZ=America/New_York
+      - PYTHONPATH=/app
     depends_on:
       - db
 volumes:

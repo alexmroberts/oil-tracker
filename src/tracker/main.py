@@ -9,8 +9,8 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session
 
-from tracker.models import Base, OilPrice
-from tracker.scraper import fetch_oil_prices
+from src.tracker.models import Base, OilPrice
+from src.tracker.scraper import fetch_oil_prices
 
 LOG_FORMAT = "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
@@ -109,11 +109,7 @@ def main():
             logger.info("Health Check: Database connection verified")
     except Exception as e:
         logger.critical("Health Check: Database is unreachable. %s", e)
-
-
-if __name__ == "__main__":
-    main()
-
+        return
     scheduler = BlockingScheduler()
 
     run_scraper_and_save()
@@ -135,3 +131,7 @@ if __name__ == "__main__":
             scheduler.shutdown()
         engine.dispose()
         logger.info("Database connection closed")
+
+
+if __name__ == "__main__":
+    main()

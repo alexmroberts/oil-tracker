@@ -13,9 +13,7 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+COPY . .
 
-ENV PYTHONPATH=/app/src
 ENV PYTHONUNBUFFERED=1
-
-
-CMD ["python", "src/tracker/main.py"]
+ENV PYTHONPATH=/app
