@@ -9,8 +9,6 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
-    ports:
-      - "127.0.0.1:5432:5432"
     command: >
       postgres
       -c shared_buffers=512MB
@@ -35,8 +33,6 @@ services:
     build: .
     restart: always
     command: uvicorn src.api.main:app --host 0.0.0.0 --port 8000
-    ports:
-      - "127.0.0.1:8000:8000"
     volumes:
       - ./src:/app/src
     env_file: .env
@@ -46,5 +42,19 @@ services:
       - PYTHONPATH=/app
     depends_on:
       - db
+  caddy:
+    image: caddy:latest
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - api
 volumes:
+  caddy_data:
+  caddy_config:
   oil_tracker_db_data:

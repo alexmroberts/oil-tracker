@@ -1,0 +1,9 @@
+projects.alexmroberts.net {
+    handle_path /oiltracker/api* {
+        reverse_proxy api:8000
+    }
+
+    handle {
+        redir "https://alexmroberts.net"
+    }
+}

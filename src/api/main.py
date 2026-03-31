@@ -10,7 +10,7 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-app = FastAPI(title="Heating Oil Price API")
+app = FastAPI(title="Heating Oil Price API", root_path="/oiltracker/api")
 
 
 def get_db():
