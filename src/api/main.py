@@ -1,5 +1,5 @@
 import os
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 
 from fastapi import Depends, FastAPI, HTTPException, Query
 from sqlalchemy import asc, create_engine, desc
@@ -50,4 +50,7 @@ def get_prices(
         query = query.filter(OilPrice.scraped_at <= end_date + timedelta(days=1))
     total_count = query.count()
     prices = query.order_by(sort_opt).offset(offset).limit(limit).all()
+    for p in prices:
+        if p.scraped_at.tzinfo is None:
+            p.scraped_at = p.scraped_at.replace(tzinfo=timezone.utc)
     return {"total": total_count, "limit": limit, "offset": offset, "data": prices}
