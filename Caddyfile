@@ -12,6 +12,8 @@ projects.alexmroberts.net {
         reverse_proxy api:8000
     }
 
+    redir /oiltracker/ui /oiltracker/ui/
+
     handle_path /oiltracker/ui* {
         reverse_proxy oil-dashboard:8501
     }
