@@ -7,3 +7,6 @@ python-dotenv
 ruff
 fastapi
 uvicorn
+streamlit
+pandas
+tzdata

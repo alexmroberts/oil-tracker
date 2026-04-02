@@ -1,6 +1,8 @@
 projects.alexmroberts.net {
     root * /var/www/portal
-    file_server
+    handle {
+        file_server
+    }
 
     handle /favicon.ico {
         respond "" 204
@@ -8,5 +10,9 @@ projects.alexmroberts.net {
 
     handle /oiltracker/api* {
         reverse_proxy api:8000
+    }
+
+    handle_path /oiltracker/ui* {
+        reverse_proxy oil-dashboard:8501
     }
 }

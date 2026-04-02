@@ -9,6 +9,8 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
+    ports:
+      - '5432:5432'
     command: >
       postgres
       -c shared_buffers=512MB
@@ -53,6 +55,16 @@ services:
       - ./src/portal:/var/www/portal
       - caddy_data:/data
       - caddy_config:/config
+  oil-dashboard:
+    build: .
+    command: streamlit run src/ui/dashboard.py --server.port 8501 --server.address 0.0.0.0 --browser.gatherUsageStats false
+    volumes:
+      - .:/app
+    working_dir: /app
+    environment:
+      - API_URL=http://api:8000/prices
+      - FAVICON_URL=https://alexmroberts.net/assets/images/favicon.png
+    restart: always
 volumes:
   caddy_data:
   caddy_config:
