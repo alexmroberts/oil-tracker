@@ -1,13 +1,12 @@
 projects.alexmroberts.net {
+    root * /var/www/portal
+    file_server
+
     handle /favicon.ico {
         respond "" 204
     }
 
     handle /oiltracker/api* {
         reverse_proxy api:8000
-    }
-
-    handle {
-        redir "https://alexmroberts.net"
     }
 }
