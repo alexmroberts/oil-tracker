@@ -52,7 +52,13 @@ if not full_df.empty:
     selected_qty = st.sidebar.selectbox("Select Min Quantity:", available_quantities)
 
     snapshot = full_df[full_df["min_quantity"] == selected_qty].copy()
-    current_market = snapshot.sort_values("scraped_at", ascending=False)
+
+    full_market = snapshot.sort_values("scraped_at", ascending=False)
+
+    snapshot["session_time"] = snapshot["scraped_at"].dt.floor("10min").max()
+    latest_session = snapshot["session_time"].max()
+    current_market = snapshot[snapshot["session_time"] == latest_session]
+    current_market = current_market.drop_duplicates(subset=["supplier_name"])
 
     if not current_market.empty:
         low_row = current_market.loc[current_market["price_per_gallon"].idxmin()]
@@ -61,14 +67,14 @@ if not full_df.empty:
 
         col1, col2, col3 = st.columns(3)
         col1.metric(
-            "Lowest Price",
-            f"${low_row['price_per_gallon']:.3f}",
+            "Latest Lowest Price",
+            f"${low_row['price_per_gallon']:.2f}",
         )
         col1.caption(f"Supplier: **{low_row['supplier_name']}**")
-        col2.metric("Median Price", f"${median_price:.3f}")
+        col2.metric("Latest Median Price", f"${median_price:.2f}")
         col3.metric(
-            "Highest Price",
-            f"${high_row['price_per_gallon']:.3f}",
+            "Latest Highest Price",
+            f"${high_row['price_per_gallon']:.2f}",
         )
         col3.caption(f"Supplier: **{high_row['supplier_name']}**")
 
@@ -111,9 +117,9 @@ if not full_df.empty:
 
         with st.expander("View Full Market Table"):
             st.dataframe(
-                current_market[
-                    ["supplier_name", "price_per_gallon", "scraped_at"]
-                ].sort_values("price_per_gallon"),
+                full_market[
+                    ["supplier_name", "price_per_gallon", "price_type", "scraped_at"]
+                ].sort_values("scraped_at", ascending=False),
                 width="stretch",
                 hide_index=True,
             )
