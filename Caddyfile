@@ -1,4 +1,4 @@
-projects.alexmroberts.net {
+{$SITE_ADDRESS} {
     root * /var/www/portal
     handle {
         file_server

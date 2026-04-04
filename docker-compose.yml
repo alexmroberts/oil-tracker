@@ -50,6 +50,8 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    environment:
+      - SITE_ADDRESS=projects.alexmroberts.net
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - ./src/portal:/var/www/portal
