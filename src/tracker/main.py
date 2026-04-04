@@ -116,9 +116,9 @@ def main():
     scheduler.add_job(
         run_scraper_and_save,
         "cron",
-        hour=8,
+        hour="4,8,12,16,20",
         minute=0,
-        jitter=7200,
+        jitter=3600,
         timezone="America/New_York",
     )
 
