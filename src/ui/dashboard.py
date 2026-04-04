@@ -55,7 +55,7 @@ if not full_df.empty:
 
     full_market = snapshot.sort_values("scraped_at", ascending=False)
 
-    snapshot["session_time"] = snapshot["scraped_at"].dt.floor("10min").max()
+    snapshot["session_time"] = snapshot["scraped_at"].dt.floor("10min")
     latest_session = snapshot["session_time"].max()
     current_market = snapshot[snapshot["session_time"] == latest_session]
     current_market = current_market.drop_duplicates(subset=["supplier_name"])
